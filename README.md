@@ -1,0 +1,2 @@
+# Minesweeper
+Unfinished AI project
