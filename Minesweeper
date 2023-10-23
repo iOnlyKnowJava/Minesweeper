@@ -1,0 +1,236 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.common.by import By
+import time
+import base64
+from PIL import Image
+from selenium.webdriver.support import expected_conditions as EC
+import win32api
+import mlfunction as ml
+
+
+
+
+
+
+
+
+def play():
+  s = Service('/usr/lib/chromium-browser/chromedriver')
+  url = 'https://www.google.com/search?surl=1&safe=active&q=minesweeper'
+  browser = webdriver.Chrome(service=s)
+  browser.get(url)
+  # browser.fullscreen_window()
+  browser.implicitly_wait(1)
+  button = browser.find_element(By.CLASS_NAME, 'cEzwpd')
+  button.click()
+  # time.sleep(30)
+  try:
+      button2 = WebDriverWait(browser, 1).until(
+          EC.presence_of_element_located((By.CSS_SELECTOR, '#ow12 > div.CcNe6e')))
+      button3 = browser.find_element(By.CSS_SELECTOR,
+                                     '#ow12 > div.UjBGL.pkWBse.iRQHZe > g-menu > g-menu-item:nth-child(3) '
+                                     '> div')
+  except:
+      button2 = WebDriverWait(browser, 1).until(
+          EC.presence_of_element_located((By.CSS_SELECTOR, '#ow30 > div.CcNe6e')))
+      button3 = browser.find_element(By.CSS_SELECTOR,
+                                     '#ow30 > div.UjBGL.pkWBse.iRQHZe > g-menu > g-menu-item:nth-child(3) '
+                                     '> div')
+  button2.click()
+  button3.click()
+  arr = [[[0] * 3] * 24] * 20
+  spacing = 25
+  start1 = 6
+  start2 = 1;
+  green1 = {73, 209, 162}
+  green2 = {81, 170, 215}
+  green3 = {225, 125, 191}
+  green4 = {185, 221, 119}
+  four = {162, 123, 31}
+  three = {211, 47}
+  one = {25, 210, 118}
+  two = {56, 60, 142}
+  five = {143, 0, 255}
+  six = {0, 167, 151}
+  zero1 = {194, 229, 159}
+  zero2 = {184, 153, 215}
+  flag = {242, 54, 7}
+  flagelement = browser.find_element(By.CLASS_NAME, "KAQ14c")
+  flags = int(flagelement.text)
+  list = [""]
+  strset = set("")
+  strset.clear()
+  list.clear()
+  while flags > 1:
+      # print(flags)
+      flagelement = browser.find_element(By.CLASS_NAME, "KAQ14c")
+      flags = int(flagelement.text)
+      if (win32api.GetKeyState(0x01) < 0) or (win32api.GetKeyState(0x04) < 0):
+          print("clicked")
+          time.sleep(.2)
+          myCanvas = browser.find_element(By.CLASS_NAME, 'ecwpfc')
+          canvas64 = browser.execute_script("return arguments[0].toDataURL('image/png').substring(21);", myCanvas)
+          canvaspng = base64.b64decode(canvas64)
+          img = open('image.png', 'wb')
+          img.write(canvaspng)
+          savedimg = Image.open("image.png")
+          savedimg = savedimg.convert("RGB")
+          string = ""
+          out = False
+          for i in range(0, 20):
+              if (out):
+                  break
+              j = 0;
+              while j < 24:
+                  coordx = (int)(spacing / 2 + start2 + j * spacing)
+                  coordy = (int)(start1 + i * spacing)
+                  r, g, b = savedimg.getpixel((coordx, coordy))
+                  arr[i][j] = {r, g, b}
+                  tempstr = "";
+                  if (arr[i][j] == green3 or arr[i][j] == green1 or arr[i][j] == green2 or arr[i][j] == green4):
+                      tempstr = "?"
+                  elif (arr[i][j] == one):
+                      tempstr = "1"
+                  elif (arr[i][j] == two):
+                      tempstr = "2"
+                  elif (arr[i][j] == three):
+                      tempstr = "3"
+                  elif (arr[i][j] == four):
+                      tempstr = "4"
+                  elif (arr[i][j] == five):
+                      tempstr = "5"
+                  elif (arr[i][j] == six):
+                      tempstr = "6"
+                  elif (arr[i][j] == zero1 or arr[i][j] == zero2):
+                      tempstr = "0"
+                  elif (arr[i][j] == flag):
+                      tempstr = "F"
+                  else:
+                      # tempstr=str(arr[i][j])
+                      print(arr[i][j])
+                      time.sleep(.2)
+                      out = True
+                      break
+                  string += tempstr + " "
+                  j += 1
+              string += "\n"
+
+
+
+
+          if (out):
+              continue
+          if string not in strset:
+              list.append(string)
+          strset.add(string)
+          print(string)
+      else:
+          time.sleep(.2)
+  count = 1
+  for st in list:
+      file = open("test" + str(count) + ".txt", 'w')
+      file.write(st)
+      file.close()
+      count += 1
+  return count - 1
+
+
+
+
+
+
+
+
+# savedimg.show()
+userinput = input()
+while userinput != 1:
+  play()
+  userinput = input()
+time.sleep(500)
+import tensorflow as tf
+from tensorflow import keras
+from keras.layers import *
+from keras.models import Model
+from keras.utils import plot_model
+import numpy as np
+
+
+def load(max):
+ newmodel = False
+ highest = max
+ input1 = tf.keras.Input(shape=(480,))
+ layer1 = Dense(480, activation='relu')(input1)
+ layer2 = Dense(2, activation='sigmoid')(layer1)
+ model = Model(inputs=input1, outputs=layer2)
+
+
+ if not newmodel:
+     model = tf.keras.models.load_model('C:/Users/x1002477/PycharmProjects/pythonProject1/Model',
+                                        compile=False)
+ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+               loss=tf.keras.losses.BinaryCrossentropy(),
+               metrics=[tf.keras.metrics.BinaryAccuracy(),
+                        tf.keras.metrics.FalseNegatives()])
+ print(model.summary())
+
+
+ # fit = training
+
+
+ lastarr = open("test" + str(highest) + ".txt", "r").read().split(" ")
+
+
+ for i in range(1, highest - 1):
+     file = open("test" + str(i) + ".txt", "r").read().split(" ")
+     listx = []
+     for j in range(0, 480):
+         file[j] = file[j].removeprefix("\n")
+         file[j] = file[j].removesuffix("\n")
+         if file[j] != "F" and file[j] != "?":
+             listx.append(int(file[j]))
+         else:
+             listx.append(-1)
+     x = np.array(listx)  # input data
+     x = x.reshape(1, 480)
+     for j in range(0, 480):
+         if listx[j] == -1 and (lastarr[j] != "?" and lastarr[j] != "F"):
+             y = np.array([j / 24 + 1, j % 24 + 1])  # expected output data
+             y = y.reshape(1, 2)
+             model.fit(x=x, y=y, epochs=1)
+             temp = [j / 24 + 1, j % 24 + 1]
+     model.predict(np.array(([0] * 480)).reshape(1, 480))
+     if newmodel:
+         Model.save(model, "C:/Users/x1002477/PycharmProjects/pythonProject1/Model", overwrite=True)
+     return
+
+
+
+
+loading = False
+if loading:
+ loaded_model = tf.keras.models.load_model('C:/Users/x1002477/PycharmProjects/pythonProject1/Model',
+                                           compile=False)
+ while True:
+     listx = []
+     teststr = input()
+     if teststr == "stop":
+         Model.save(loaded_model, "C:/Users/x1002477/PycharmProjects/pythonProject1/Model", overwrite=True)
+         break
+     str = teststr.split(" ")
+     for j in range(0, 480):
+         str[j] = str[j].removeprefix("\n")
+         str[j] = str[j].removesuffix("\n")
+         if str[j] != "F" and str[j] != "?":
+             listx.append(int(str[j]))
+         else:
+             listx.append(-1)
+     print(loaded_model.predict(np.array(listx)))
+
+
+
+
+
+
+
